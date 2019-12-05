@@ -20,8 +20,7 @@ public class Router implements RouteInvoker {
 
     @Override
     public void invoke(String path, ActionContext context) throws Exception {
-        val message = context.getMessage();
-        val nextPath = message.getTexts()[level];
+        val nextPath = context.getPath()[level];
         val invoker = routers.get(nextPath);
         if (invoker != null) {
             invoker.invoke(nextPath, context);

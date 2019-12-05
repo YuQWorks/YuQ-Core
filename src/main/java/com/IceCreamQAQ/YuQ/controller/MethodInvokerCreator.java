@@ -38,13 +38,13 @@ public class MethodInvokerCreator {
     }
 
     public Class<? extends MethodInvoker> createInvoker(Method method, MethodNode methodNode) {
-        ClassWriter cw = new ClassWriter(0);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         MethodVisitor mv;
 
         String name = getUniqueName(method);
         String desc = name.replace('.', '/');
 
-        cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, desc, null, "java/lang/Object", new String[]{invokerClassName});
+        cw.visit(V1_8, ACC_PUBLIC | ACC_SUPER, desc, null, "java/lang/Object", new String[]{invokerClassName});
 
         cw.visitSource(".dynamic", null);
         {
@@ -121,7 +121,7 @@ public class MethodInvokerCreator {
             } else {
                 mv.visitInsn(ARETURN);
             }
-            mv.visitMaxs(4, 4);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         cw.visitEnd();

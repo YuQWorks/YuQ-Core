@@ -2,53 +2,38 @@ package com.IceCreamQAQ.YuQ.controller;
 
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.annotation.PathVar;
-import com.IceCreamQAQ.YuQ.entity.Message;
+import com.IceCreamQAQ.YuQ.entity.Result;
 import com.IceCreamQAQ.YuQ.inject.ActionContextInject;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.val;
 import lombok.var;
 
-public class ActionContext {
+import javax.validation.constraints.NotNull;
+
+public abstract class ActionContext {
 
     @Getter
-    private Message message;
-
-    @Getter
-    @Setter
-    private Message reMessage;
-
-    @Getter
-    @Setter
-    private boolean at = false;
+    private String[] path;
 
     @Getter
     @Setter
-    private boolean re = false;
+    private Result result;
 
     @Getter
     @Setter
-    private Integer intercept = 0;
+    private Boolean success=false;
 
     @Inject
-    private YuQInject globalInject;
+    protected YuQInject globalInject;
 
-    private ActionContextInject contextInject;
+    protected ActionContextInject contextInject;
 
-    public ActionContext(Message message) {
-        contextInject = new ActionContextInject();
+    public ActionContext(String[] path){
+        contextInject=new ActionContextInject();
+        contextInject.putInjectObj(ActionContext.class.getName(),"",this);
 
-        contextInject.putInjectObj(message.getClass().toString(), "", message);
-
-        contextInject.putInjectObj("java.lang.Long", "qq", message.getQq());
-        if (message.getGroup() != null) contextInject.putInjectObj("java.lang.Long", "group", message.getGroup());
-        if (message.getNoName() != null)
-            contextInject.putInjectObj(message.getNoName().getClass().getName(), "", message.getNoName());
-        contextInject.putInjectObj(message.getTexts().getClass().getName(), "", message.getTexts());
-        contextInject.putInjectObj(message.getMsg().getClass().getName(), "", message.getMsg());
-
-        this.message = message;
+        this.path=path;
     }
 
     public void saveObj(Object object) {
@@ -84,34 +69,8 @@ public class ActionContext {
         return (T) obj;
     }
 
-    public <T> T injectPathVar(Class<T> clazz, Integer key, PathVar.Type type) {
-        Object para;
+    public abstract <T> T injectPathVar(@NotNull Class<T> clazz,@NotNull Integer key,@NotNull PathVar.Type type);
 
-        val message = getMessage();
-        val texts = message.getTexts();
-
-        switch (type) {
-            case string:
-                para = texts[key];
-                break;
-            case qq:
-                para = Long.parseLong(texts[key]);
-                break;
-            case flag:
-                val text = texts[key];
-                para = text.contains("开") || text.contains("启");
-                break;
-            case group:
-                para = Long.parseLong(texts[key]);
-                break;
-            case number:
-                para = Integer.parseInt(texts[key]);
-                break;
-            default:
-                para = null;
-        }
-
-        return (T) para;
-    }
-
+    public abstract @NotNull void buildResult(@NotNull String text);
+    public abstract @NotNull void buildResult(@NotNull Object obj);
 }
